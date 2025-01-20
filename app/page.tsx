@@ -14,7 +14,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("overview");
 
   return (
-    <div className="grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] min-h-screen">
+    <div className="grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] ">
       {/* Main content */}
       <main className="p-4">
         {/* Tabs */}
