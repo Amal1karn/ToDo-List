@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { DashboardHeader } from "@/components/Header";
-import { DashboardSidebar } from "@/components/dashboard-sidebar";
 
 const tabs = [
   { name: "Overview", id: "overview" },
