@@ -1,44 +1,21 @@
-"use client";
+// page.tsx (Server Component)
+import { BoardClient } from "../components/BoardClient";
+import { getGroupedTasks } from "../app/actions/taskActions";
+import ErrorBoundary from "../components/ErrorBoundary";
 
-import { useState } from "react";
-
-const tabs = [
-  { name: "Overview", id: "overview" },
-  { name: "Boards", id: "boards" },
-  { name: "Reports", id: "reports" },
-];
-
-export default function Home() {
-  const [activeTab, setActiveTab] = useState("overview");
-
-  return (
-    <div className="grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] ">
-      {/* Main content */}
-      <main className="p-4">
-        {/* Tabs */}
-        <div className="flex border-b mb-4">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 ${
-                activeTab === tab.id
-                  ? "border-b-2 border-blue-500 text-blue-500"
-                  : "text-gray-500"
-              }`}
-            >
-              {tab.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div className="flex items-center justify-center h-full">
-          {activeTab === "overview" && <div>Overview Content</div>}
-          {activeTab === "boards" && <div>Boards Content</div>}
-          {activeTab === "reports" && <div>Reports Content</div>}
-        </div>
-      </main>
-    </div>
-  );
+export default async function Home() {
+  try {
+    const columns = await getGroupedTasks();
+    return (
+      <ErrorBoundary
+        fallback={<div>Something went wrong. Please try again later.</div>}
+      >
+        <BoardClient initialColumns={columns} />
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error("Failed to fetch board data:", error);
+    // Return a fallback UI or error message
+    return <div>Error loading board data. Please try again later.</div>;
+  }
 }
