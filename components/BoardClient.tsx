@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Board } from "../components/Board";
+import { Board } from "./BoardComponent";
 import { BoardClientProps, Tab } from "../types";
 
 const tabs: Tab[] = [
