@@ -24,7 +24,7 @@ CREATE TABLE "Task" (
     "status" "Status" NOT NULL DEFAULT 'TODO',
     "priority" "Priority" NOT NULL DEFAULT 'MEDIUM',
     "dueDate" TIMESTAMP(3),
-    "userId" TEXT NOT NULL,
+    "userId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -35,4 +35,4 @@ CREATE TABLE "Task" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Task" ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
