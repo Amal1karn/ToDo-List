@@ -7,10 +7,10 @@ export interface Task {
   description: string | null;
   status: Status;
   priority: Priority;
-  dueDate: Date | null;
-  userId: string; // Changed from userID to userId to match Prisma schema
-  createdAt: Date; // Changed from string to Date
-  updatedAt: Date; // Changed from string to Date
+  dueDate: string | null;
+  userId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ColumnType {
@@ -35,3 +35,16 @@ export interface BoardClientProps {
   initialColumns: ColumnType[];
 }
 export { Status, Priority };
+
+export interface CardProps {
+  task: Task;
+  refreshBoard: () => Promise<void>;
+}
+
+export interface CardModalProps {
+  task: Task;
+
+  onClose: () => void;
+
+  refreshBoard: () => Promise<void>;
+}

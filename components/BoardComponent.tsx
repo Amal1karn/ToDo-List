@@ -1,50 +1,22 @@
 "use client";
 import {
   DndContext,
-  DragOverlay,
   closestCorners,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
+  DragEndEvent,
 } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Column } from "./Column";
-import { ColumnType, Task } from "../types";
-import { updateTaskStatus } from "../app/actions/taskActions";
-import { useEffect, useState } from "react";
+import { ColumnType } from "../types";
+import { updateTaskStatus, getGroupedTasks } from "../app/actions/taskActions";
+import { useState, useCallback } from "react";
 import { Status } from "@prisma/client";
 
-// Define static columns based on Status enum
-const BOARD_COLUMNS: ColumnType[] = [
-  { id: Status.TODO, title: "To Do", tasks: [] },
-  { id: Status.IN_PROGRESS, title: "In Progress", tasks: [] },
-  { id: Status.DONE, title: "Done", tasks: [] },
-];
-
 export function Board({ columns: initialColumns }: { columns: ColumnType[] }) {
-  // Merge static columns with initial columns
-  const mergedColumns = BOARD_COLUMNS.map((staticColumn) => {
-    const matchingColumn = initialColumns.find(
-      (col) => col.id === staticColumn.id
-    );
-    return {
-      ...staticColumn,
-      tasks: matchingColumn ? matchingColumn.tasks : [],
-    };
-  });
-
-  const [columns, setColumns] = useState(BOARD_COLUMNS);
-
-  useEffect(() => {
-    setColumns(mergedColumns);
-  }, []);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [columns, setColumns] = useState(initialColumns);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -53,71 +25,78 @@ export function Board({ columns: initialColumns }: { columns: ColumnType[] }) {
     })
   );
 
-  const handleDragStart = (event: any) => {
-    const { active } = event;
-    setActiveId(active.id);
-  };
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over) return;
 
-  const handleDragEnd = async (event: any) => {
-    const { active, over } = event;
+      const activeId = active.id as string;
+      const overId = over.id as string;
 
-    if (!over) return;
+      const oldColumnId = columns.find((col) =>
+        col.tasks.some((task) => task.id === activeId)
+      )?.id;
+      const newColumnId = overId;
 
-    const oldColumnId = columns.find((col) =>
-      col.tasks.some((task) => task.id === active.id)
-    )?.id;
-
-    const newColumnId = over.id;
-
-    if (oldColumnId && newColumnId && oldColumnId !== newColumnId) {
-      // Update columns state
-      setColumns((prevColumns) => {
-        const newColumns = prevColumns.map((column) => ({
-          ...column,
-          tasks: column.tasks.filter((task) => task.id !== active.id),
-        }));
-
-        const movedTask = prevColumns
-          .flatMap((col) => col.tasks)
-          .find((task) => task.id === active.id);
-
-        if (movedTask) {
-          const targetColumnIndex = newColumns.findIndex(
-            (col) => col.id === newColumnId
-          );
-          newColumns[targetColumnIndex].tasks.push({
-            ...movedTask,
-            status: newColumnId as Status,
+      if (oldColumnId && newColumnId && oldColumnId !== newColumnId) {
+        setColumns((prevColumns) => {
+          const newColumns = prevColumns.map((column) => {
+            if (column.id === oldColumnId) {
+              return {
+                ...column,
+                tasks: column.tasks.filter((task) => task.id !== activeId),
+              };
+            }
+            if (column.id === newColumnId) {
+              const movedTask = prevColumns
+                .flatMap((col) => col.tasks)
+                .find((task) => task.id === activeId);
+              if (movedTask) {
+                return {
+                  ...column,
+                  tasks: [
+                    ...column.tasks,
+                    { ...movedTask, status: newColumnId as Status },
+                  ],
+                };
+              }
+            }
+            return column;
           });
+          return newColumns;
+        });
+
+        try {
+          await updateTaskStatus(activeId, newColumnId as Status);
+        } catch (error) {
+          console.error("Failed to update task status:", error);
+          // Optionally, revert the UI change here if the API call fails
         }
+      }
+    },
+    [columns]
+  );
 
-        return newColumns;
-      });
-
-      // Update task status in the database
-      await updateTaskStatus(active.id, newColumnId as Status);
+  const refreshBoard = useCallback(async () => {
+    try {
+      const updatedColumns = await getGroupedTasks();
+      setColumns(updatedColumns);
+    } catch (error) {
+      console.error("Failed to refresh board:", error);
     }
-
-    setActiveId(null);
-  };
+  }, []);
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
       <div className="flex space-x-4 overflow-x-auto p-4">
         {columns.map((column) => (
-          <Column key={column.id} column={column} />
+          <Column key={column.id} column={column} refreshBoard={refreshBoard} />
         ))}
       </div>
-      <DragOverlay>
-        {activeId ? (
-          <div className="bg-white p-2 rounded shadow">Moving task...</div>
-        ) : null}
-      </DragOverlay>
     </DndContext>
   );
 }
