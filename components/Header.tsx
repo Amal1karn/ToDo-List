@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { Frame, Bell, User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -24,6 +25,12 @@ const navigation = [
 
 export function DashboardHeader() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false }); // Prevent default NextAuth redirect
+    router.push("/login"); // Redirect to login page
+  };
 
   return (
     <header className="bg-neutral-100 border-b">
@@ -32,7 +39,6 @@ export function DashboardHeader() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-4">
               <Frame className="h-8 w-8 text-primary" />
-
               <h1 className="text-3xl font-bold">TO-DO</h1>
             </Link>
             <div className="ml-60 hidden space-x-16 lg:block">
@@ -69,7 +75,9 @@ export function DashboardHeader() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Profile</DropdownMenuItem>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Sign out</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>
+                  Sign out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
