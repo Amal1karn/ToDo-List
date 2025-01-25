@@ -1,10 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { Card } from "./Card";
 import { CardModal } from "./CardModal";
 import { ColumnType, Status, Priority, Task } from "../types";
@@ -36,21 +33,22 @@ export function Column({
   };
 
   return (
-    <div ref={setNodeRef} className="bg-gray-100 p-4 rounded-lg shadow-md w-64">
+    <div ref={setNodeRef} className="bg-gray-200 p-4 rounded-lg shadow-md w-64">
       <h2 className="text-lg font-bold mb-4">{column.title}</h2>
-      <SortableContext
-        items={column.tasks}
-        strategy={verticalListSortingStrategy}
-      >
-        {column.tasks.map((task) => (
-          <Card key={task.id} task={task} refreshBoard={refreshBoard} />
-        ))}
+      <SortableContext items={column.tasks} strategy={rectSortingStrategy}>
+        <div className="grid grid-cols-1 gap-2">
+          {column.tasks.map((task, index) => (
+            <div key={task.id} style={{ marginTop: index > 0 ? "-2rem" : "0" }}>
+              <Card task={task} refreshBoard={refreshBoard} />
+            </div>
+          ))}
+        </div>
       </SortableContext>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        className="mt-4 w-full border-2 border-white border-dashed text-white px-4 py-2 rounded hover:bg-neutral-300 text-3xl font-extrabold"
       >
-        New Task
+        +
       </button>
       {isModalOpen && (
         <CardModal
