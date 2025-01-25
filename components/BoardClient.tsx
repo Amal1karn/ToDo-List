@@ -1,18 +1,22 @@
 "use client";
 import { useState } from "react";
 import { Board } from "./BoardComponent";
-import { BoardClientProps, Tab } from "../types";
+import { BoardClientProps, Tab, ColumnType } from "../types";
 
 const tabs: Tab[] = [
   { name: "Boards", id: "boards" },
   { name: "Reports", id: "reports" },
 ];
 
-export function BoardClient({ initialColumns }: BoardClientProps) {
-  const [activeTab, setActiveTab] = useState<string>("boards");
+export function BoardClient({
+  initialColumns,
+}: {
+  initialColumns: ColumnType[];
+}) {
+  const [activeTab, setActiveTab] = useState<Tab["id"]>("boards");
 
   return (
-    <div className="p-4">
+    <div className=" flex flex-col h-screenp-4">
       <div className="flex border-b mb-4">
         {tabs.map((tab) => (
           <button

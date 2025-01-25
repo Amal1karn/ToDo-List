@@ -1,4 +1,3 @@
-// types.ts
 import { Status, Priority } from "@prisma/client";
 
 export interface Task {
@@ -19,32 +18,38 @@ export interface ColumnType {
   tasks: Task[];
 }
 
-// Alias for ColumnType to maintain consistency
-export type Column = ColumnType;
+export interface BoardProps {
+  columns: ColumnType[];
+}
 
 export interface ColumnProps {
-  column: Column;
+  column: ColumnType;
+  onDeleteTask: (taskId: string) => Promise<void>;
+  onUpdateTask: (task: Task) => Promise<void>;
+  onCreateTask: (
+    task: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => Promise<void>;
+  refreshBoard: () => Promise<void>;
 }
-
-export interface Tab {
-  name: string;
-  id: string;
-}
-
-export interface BoardClientProps {
-  initialColumns: ColumnType[];
-}
-export { Status, Priority };
 
 export interface CardProps {
   task: Task;
-  refreshBoard: () => Promise<void>;
+  onDelete: () => Promise<void>;
+  onUpdate: (task: Task) => Promise<void>;
 }
 
 export interface CardModalProps {
   task: Task;
-
   onClose: () => void;
-
-  refreshBoard: () => Promise<void>;
+  onSave: (task: Task) => Promise<void>;
+  onDelete?: () => Promise<void>;
+  mode: "create" | "edit";
 }
+export interface BoardClientProps {
+  initialColumns: ColumnType[];
+}
+export interface Tab {
+  name: string;
+  id: string;
+}
+export { Status, Priority };

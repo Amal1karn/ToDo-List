@@ -1,4 +1,6 @@
 // page.tsx (Server Component)
+// homepage
+
 import { BoardClient } from "../components/BoardClient";
 import { getGroupedTasks } from "../app/actions/taskActions";
 import ErrorBoundary from "../components/ErrorBoundary";
