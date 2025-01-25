@@ -14,7 +14,7 @@ import {
 
 export function DashboardHeader() {
   return (
-    <header className=" bg-background border-b">
+    <header className=" bg-stone-200 border-b">
       <div className="flex h-16 items-center px-4 gap-4">
         <h1 className="text-xl font-semibold">Dashboard</h1>
         <div className="ml-auto flex items-center space-x-4">
