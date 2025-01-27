@@ -7,7 +7,7 @@ import {
 } from "@dnd-kit/sortable";
 import { Card } from "./Card";
 import { CardModal } from "./CardModal";
-import { ColumnType, Status, Priority, Task } from "../types";
+import { ColumnType, Priority, Task } from "../types";
 import { createTask } from "../app/actions/taskActions";
 
 export function Column({
@@ -17,6 +17,7 @@ export function Column({
   column: ColumnType;
   refreshBoard: () => Promise<void>;
 }) {
+  console.log("Column data:", column);
   const { setNodeRef } = useDroppable({ id: column.id });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -26,7 +27,7 @@ export function Column({
     try {
       await createTask({
         ...newTask,
-        status: column.id as Status,
+        columnId: column.id,
       });
       setIsModalOpen(false);
       await refreshBoard();
@@ -56,12 +57,16 @@ export function Column({
         <CardModal
           task={
             {
+              id: "",
               title: "",
               description: "",
-              status: column.id as Status,
+              status: "TODO",
               priority: Priority.MEDIUM,
               dueDate: null,
               userId: null,
+              columnId: column.id,
+              createdAt: new Date(),
+              updatedAt: new Date(),
             } as Task
           }
           onClose={() => setIsModalOpen(false)}

@@ -52,7 +52,7 @@ export function Card({ task, refreshBoard }: CardProps) {
           task={task}
           onClose={() => setIsModalOpen(false)}
           refreshBoard={refreshBoard}
-          mode={"create"}
+          mode="edit"
         />
       )}
     </>

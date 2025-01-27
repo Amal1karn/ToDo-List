@@ -9,6 +9,7 @@ const tabs: Tab[] = [
 ];
 
 export function BoardClient({ initialColumns }: BoardClientProps) {
+  console.log("Initial columns in BoardClient:", initialColumns);
   const [activeTab, setActiveTab] = useState<string>("boards");
 
   return (

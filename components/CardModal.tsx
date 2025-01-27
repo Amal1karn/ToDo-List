@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Task, Status, Priority } from "../types";
+import { Task, Priority } from "../types";
 import { updateTask, createTask } from "../app/actions/taskActions";
 
 interface CardModalProps {
@@ -18,7 +18,6 @@ export function CardModal({
 }: CardModalProps) {
   const [editedTask, setEditedTask] = useState<Task>({
     ...task,
-    // Ensure dueDate is converted to a string for controlled input
     dueDate: task.dueDate
       ? new Date(task.dueDate).toISOString().split("T")[0]
       : null,
@@ -35,10 +34,10 @@ export function CardModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Ensure dueDate is converted back to a Date or null for backend
     const taskData = {
       ...editedTask,
       dueDate: editedTask.dueDate ? new Date(editedTask.dueDate) : null,
+      columnId: task.columnId,
     };
 
     console.log(`Attempting to ${mode} task with data:`, taskData);
@@ -84,18 +83,6 @@ export function CardModal({
             className="w-full mb-2 p-2 border rounded"
             placeholder="Task Description"
           />
-          <select
-            name="status"
-            value={editedTask.status}
-            onChange={handleChange}
-            className="w-full mb-2 p-2 border rounded"
-          >
-            {Object.values(Status).map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
           <select
             name="priority"
             value={editedTask.priority}

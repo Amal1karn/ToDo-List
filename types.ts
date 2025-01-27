@@ -1,14 +1,23 @@
 // types.ts
-import { Status, Priority } from "@prisma/client";
+import { Priority } from "@prisma/client";
 
 export interface Task {
   id: string;
   title: string;
   description: string | null;
-  status: Status;
   priority: Priority;
   dueDate: string | null;
   userId: string | null;
+  columnId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Column {
+  id: string;
+  title: string;
+  order: number;
+  tasks: Task[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,9 +27,6 @@ export interface ColumnType {
   title: string;
   tasks: Task[];
 }
-
-// Alias for ColumnType to maintain consistency
-export type Column = ColumnType;
 
 export interface ColumnProps {
   column: Column;
@@ -34,7 +40,7 @@ export interface Tab {
 export interface BoardClientProps {
   initialColumns: ColumnType[];
 }
-export { Status, Priority };
+export { Priority };
 
 export interface CardProps {
   task: Task;

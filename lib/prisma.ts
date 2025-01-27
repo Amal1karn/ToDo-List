@@ -23,3 +23,18 @@ export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 export default prisma;
 
 if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
+
+export async function testConnection() {
+  try {
+    await prisma.$connect();
+    console.log("Successfully connected to the database");
+
+    // Check if there are any columns in the database
+    const columnCount = await prisma.column.count();
+    console.log(`Number of columns in the database: ${columnCount}`);
+  } catch (error) {
+    console.error("Failed to connect to the database:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}

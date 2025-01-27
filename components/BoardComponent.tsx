@@ -11,11 +11,11 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Column } from "./Column";
 import { ColumnType } from "../types";
-import { updateTaskStatus, getGroupedTasks } from "../app/actions/taskActions";
+import { moveTask, getColumnsWithTasks } from "../app/actions/taskActions";
 import { useState, useCallback } from "react";
-import { Status } from "@prisma/client";
 
 export function Board({ columns: initialColumns }: { columns: ColumnType[] }) {
+  console.log("Initial columns in Board:", initialColumns);
   const [columns, setColumns] = useState(initialColumns);
 
   const sensors = useSensors(
@@ -56,7 +56,7 @@ export function Board({ columns: initialColumns }: { columns: ColumnType[] }) {
                   ...column,
                   tasks: [
                     ...column.tasks,
-                    { ...movedTask, status: newColumnId as Status },
+                    { ...movedTask, columnId: newColumnId },
                   ],
                 };
               }
@@ -67,7 +67,7 @@ export function Board({ columns: initialColumns }: { columns: ColumnType[] }) {
         });
 
         try {
-          await updateTaskStatus(activeId, newColumnId as Status);
+          await moveTask(activeId, newColumnId);
         } catch (error) {
           console.error("Failed to update task status:", error);
           // Optionally, revert the UI change here if the API call fails
@@ -79,7 +79,7 @@ export function Board({ columns: initialColumns }: { columns: ColumnType[] }) {
 
   const refreshBoard = useCallback(async () => {
     try {
-      const updatedColumns = await getGroupedTasks();
+      const updatedColumns = await getColumnsWithTasks();
       setColumns(updatedColumns);
     } catch (error) {
       console.error("Failed to refresh board:", error);
