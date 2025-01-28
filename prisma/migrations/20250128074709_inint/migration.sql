@@ -1,5 +1,8 @@
 -- CreateEnum
-CREATE TYPE "Priority" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+CREATE TYPE "Status" AS ENUM ('todo', 'in_progress', 'done');
+
+-- CreateEnum
+CREATE TYPE "Priority" AS ENUM ('low', 'medium', 'high');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -18,12 +21,13 @@ CREATE TABLE "Task" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
-    "priority" "Priority" NOT NULL DEFAULT 'MEDIUM',
+    "status" "Status" NOT NULL DEFAULT 'todo',
+    "priority" "Priority" NOT NULL DEFAULT 'medium',
     "dueDate" TIMESTAMP(3),
-    "columnId" TEXT NOT NULL,
-    "userId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" TEXT,
+    "columnId" TEXT NOT NULL,
 
     CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
 );

@@ -1,34 +1,27 @@
 "use client";
 import { useState } from "react";
-import { useDroppable } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { Card } from "./Card";
 import { CardModal } from "./CardModal";
-import { ColumnType, Priority, Task } from "../types";
+import { ColumnType, Task, Priority, Status } from "../types";
 import { createTask } from "../app/actions/taskActions";
 
 export function Column({
   column,
+  index,
   refreshBoard,
 }: {
   column: ColumnType;
+  index: number;
   refreshBoard: () => Promise<void>;
 }) {
-  console.log("Column data:", column);
-  const { setNodeRef } = useDroppable({ id: column.id });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCreateTask = async (
-    newTask: Omit<Task, "id" | "createdAt" | "updatedAt">
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
   ) => {
     try {
-      await createTask({
-        ...newTask,
-        columnId: column.id,
-      });
+      await createTask(taskData);
       setIsModalOpen(false);
       await refreshBoard();
     } catch (error) {
@@ -37,43 +30,54 @@ export function Column({
   };
 
   return (
-    <div ref={setNodeRef} className="bg-gray-100 p-4 rounded-lg shadow-md w-64">
-      <h2 className="text-lg font-bold mb-4">{column.title}</h2>
-      <SortableContext
-        items={column.tasks}
-        strategy={verticalListSortingStrategy}
-      >
-        {column.tasks.map((task) => (
-          <Card key={task.id} task={task} refreshBoard={refreshBoard} />
-        ))}
-      </SortableContext>
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-      >
-        New Task
-      </button>
-      {isModalOpen && (
-        <CardModal
-          task={
-            {
-              id: "",
-              title: "",
-              description: "",
-              status: "TODO",
-              priority: Priority.MEDIUM,
-              dueDate: null,
-              userId: null,
-              columnId: column.id,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            } as Task
-          }
-          onClose={() => setIsModalOpen(false)}
-          refreshBoard={refreshBoard}
-          mode="create"
-        />
+    <Draggable draggableId={column.id} index={index}>
+      {(provided) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          className="bg-gray-100 p-4 rounded-lg shadow-md w-64"
+        >
+          <h2 className="text-lg font-bold mb-4" {...provided.dragHandleProps}>
+            {column.title}
+          </h2>
+          <Droppable droppableId={column.id} type="TASK">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {column.tasks.map((task, index) => (
+                  <Card key={task.id} task={task} refreshBoard={refreshBoard} />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            New Task
+          </button>
+          {isModalOpen && (
+            <CardModal
+              mode="create"
+              task={{
+                id: "",
+                title: "",
+                description: "",
+                priority: "medium" as Priority,
+                status: "todo" as Status, // Add the status property
+                dueDate: null,
+                userId: null,
+                columnId: column.id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              }}
+              onClose={() => setIsModalOpen(false)}
+              refreshBoard={refreshBoard}
+              onSubmit={handleCreateTask}
+            />
+          )}
+        </div>
       )}
-    </div>
+    </Draggable>
   );
 }

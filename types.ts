@@ -1,11 +1,11 @@
 // types.ts
-import { Priority } from "@prisma/client";
 
 export interface Task {
   id: string;
   title: string;
   description: string | null;
   priority: Priority;
+  status: Status;
   dueDate: string | null;
   userId: string | null;
   columnId: string;
@@ -40,8 +40,8 @@ export interface Tab {
 export interface BoardClientProps {
   initialColumns: ColumnType[];
 }
-export { Priority };
-
+export type Priority = "low" | "medium" | "high";
+export type Status = "todo" | "in_progress" | "done";
 export interface CardProps {
   task: Task;
   refreshBoard: () => Promise<void>;

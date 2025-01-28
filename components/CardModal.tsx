@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Task, Priority } from "../types";
+import { Task, Priority, Status } from "../types";
 import { updateTask, createTask } from "../app/actions/taskActions";
 
 interface CardModalProps {
@@ -8,6 +8,9 @@ interface CardModalProps {
   onClose: () => void;
   refreshBoard: () => Promise<void>;
   mode: "create" | "edit";
+  onSubmit: (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => Promise<void>;
 }
 
 export function CardModal({
@@ -22,6 +25,7 @@ export function CardModal({
       ? new Date(task.dueDate).toISOString().split("T")[0]
       : null,
   });
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -34,10 +38,23 @@ export function CardModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    if (
+      !editedTask.title ||
+      !editedTask.priority ||
+      !editedTask.status ||
+      !editedTask.columnId
+    ) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
     const taskData = {
       ...editedTask,
-      dueDate: editedTask.dueDate ? new Date(editedTask.dueDate) : null,
-      columnId: task.columnId,
+      dueDate: editedTask.dueDate
+        ? new Date(editedTask.dueDate).toISOString()
+        : null,
     };
 
     console.log(`Attempting to ${mode} task with data:`, taskData);
@@ -46,19 +63,18 @@ export function CardModal({
       if (mode === "edit") {
         await updateTask(task.id, taskData);
       } else {
-        await createTask({
-          ...taskData,
-          dueDate: taskData.dueDate
-            ? taskData.dueDate.toISOString().split("T")[0]
-            : null,
-        });
+        await createTask(taskData);
       }
       await refreshBoard();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Failed to ${mode} task:`, error);
+      setError(error.message || `Failed to ${mode} task. Please try again.`);
     }
   };
+
+  const priorities: Priority[] = ["low", "medium", "high"];
+  const statuses: Status[] = ["todo", "in_progress", "done"];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -66,6 +82,7 @@ export function CardModal({
         <h2 className="text-xl font-bold mb-4">
           {mode === "edit" ? "Edit Task" : "Create New Task"}
         </h2>
+        {error && <div className="text-red-500 mb-4">{error}</div>}
         <form onSubmit={handleSubmit}>
           <input
             type="text"
@@ -88,10 +105,26 @@ export function CardModal({
             value={editedTask.priority}
             onChange={handleChange}
             className="w-full mb-2 p-2 border rounded"
+            required
           >
-            {Object.values(Priority).map((priority) => (
+            <option value="">Select Priority</option>
+            {priorities.map((priority) => (
               <option key={priority} value={priority}>
                 {priority}
+              </option>
+            ))}
+          </select>
+          <select
+            name="status"
+            value={editedTask.status}
+            onChange={handleChange}
+            className="w-full mb-2 p-2 border rounded"
+            required
+          >
+            <option value="">Select Status</option>
+            {statuses.map((status) => (
+              <option key={status} value={status}>
+                {status}
               </option>
             ))}
           </select>

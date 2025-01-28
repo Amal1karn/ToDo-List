@@ -8,8 +8,18 @@ export default async function Home() {
   await testConnection();
   try {
     console.log("Fetching columns...");
-    const columns = await getColumnsWithTasks();
-    console.log("Fetched columns:", columns); // Use the correct function
+    let columns = await getColumnsWithTasks();
+    console.log("Fetched columns:", JSON.stringify(columns, null, 2)); // Use the correct function
+
+    if (!columns || columns.length === 0) {
+      console.log("No columns found in the database");
+      columns = [
+        { id: "1", title: "To Do", tasks: [] },
+        { id: "2", title: "In Progress", tasks: [] },
+        { id: "3", title: "Done", tasks: [] },
+      ];
+    }
+
     return (
       <ErrorBoundary
         fallback={

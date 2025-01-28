@@ -1,34 +1,55 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasks     Task[]
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      Status    @default(todo)
+  priority    Priority  @default(medium)
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String?
+  columnId    String
+  column      Column    @relation(fields: [columnId], references: [id])
+  user        User?     @relation(fields: [userId], references: [id])
 }
 
 model Column {
   id        String   @id @default(cuid())
   title     String
   order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   tasks     Task[]
 }
 
-model Task {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  priority    Priority
-  dueDate     DateTime?
-  
-  columnId    String
-  column      Column   @relation(fields: [columnId], references: [id])
-
-  createdAt   DateTime @default(now())
+enum Status {
+  todo
+  in_progress
+  done
 }
 
 enum Priority {
-  LOW
-  MEDIUM
-  HIGH
+ low
+  medium
+  high
 }
