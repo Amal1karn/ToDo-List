@@ -22,34 +22,34 @@ model Task {
   id          String    @id @default(cuid())
   title       String
   description String?
-  status      Status    @default(todo)
-  priority    Priority  @default(medium)
+  status      Status    @default(TODO)
+  priority    Priority  @default(MEDIUM)
   dueDate     DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String?
   columnId    String
-  column      Column    @relation(fields: [columnId], references: [id])
+  column      Column    @relation(fields: [columnId], references: [id], onDelete: Cascade)
   user        User?     @relation(fields: [userId], references: [id])
 }
 
 model Column {
   id        String   @id @default(cuid())
   title     String
-  order     Int
+  order     Int      @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   tasks     Task[]
 }
 
 enum Status {
-  todo
-  in_progress
-  done
+  TODO
+  IN_PROGRESS
+  DONE
 }
 
 enum Priority {
- low
-  medium
-  high
+  LOW
+  MEDIUM
+  HIGH
 }

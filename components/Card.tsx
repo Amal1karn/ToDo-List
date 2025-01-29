@@ -1,60 +1,121 @@
 "use client";
-import { useState } from "react";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { CardModal } from "./CardModal";
-import { deleteTask } from "../app/actions/taskActions";
-import { CardProps } from "../types";
+import React, { useState } from "react";
+import { Draggable } from "@hello-pangea/dnd";
+import { Task } from "@/types";
+import {
+  CalendarIcon,
+  PencilIcon,
+  TrashIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from "@heroicons/react/24/outline";
 
-export function Card({ task, refreshBoard }: CardProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: task.id });
+interface CardProps {
+  task: Task;
+  index: number;
+  onEdit: () => void;
+  onDelete: () => void;
+}
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+export const Card: React.FC<CardProps> = ({
+  task,
+  index,
+  onEdit,
+  onDelete,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      try {
-        await deleteTask(task.id);
-        refreshBoard();
-      } catch (error) {
-        console.error("Failed to delete task:", error);
-      }
-    }
+  const truncateDescription = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text;
+    return text.substr(0, maxLength) + "...";
   };
 
   return (
-    <>
-      <div
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}
-        onClick={() => setIsModalOpen(true)}
-        className="bg-white p-3 mb-2 rounded shadow cursor-pointer hover:bg-gray-50"
-      >
-        <h3 className="font-semibold">{task.title}</h3>
-        <p className="text-sm text-gray-600">{task.description}</p>
-        <button
-          onClick={handleDelete}
-          className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+    <Draggable draggableId={task.id || ""} index={index}>
+      {(provided) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          className="bg-white p-4 mb-2 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+          onClick={() => setIsExpanded(!isExpanded)}
         >
-          x
-        </button>
-      </div>
-      {isModalOpen && (
-        <CardModal
-          task={task}
-          onClose={() => setIsModalOpen(false)}
-          refreshBoard={refreshBoard}
-          mode="edit"
-        />
+          <h3 className="font-bold text-lg mb-2 text-gray-800">{task.title}</h3>
+          {task.description && (
+            <p className="text-sm text-gray-600 mb-3">
+              {isExpanded
+                ? task.description
+                : truncateDescription(task.description, 100)}
+            </p>
+          )}
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center">
+              <span
+                className={`capitalize px-2 py-1 rounded ${
+                  task.priority === "HIGH"
+                    ? "bg-red-100 text-red-800"
+                    : task.priority === "MEDIUM"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-green-100 text-green-800"
+                }`}
+              >
+                {task.priority}
+              </span>
+            </div>
+            {task.dueDate && (
+              <div className="flex items-center">
+                <CalendarIcon className="h-4 w-4 mr-1" />
+                <span>{formatDate(task.dueDate)}</span>
+              </div>
+            )}
+          </div>
+          <div className="mt-3 flex justify-between items-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              {isExpanded ? (
+                <ChevronUpIcon className="h-5 w-5" />
+              ) : (
+                <ChevronDownIcon className="h-5 w-5" />
+              )}
+            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="p-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors duration-200"
+              >
+                <PencilIcon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors duration-200"
+              >
+                <TrashIcon className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-    </>
+    </Draggable>
   );
-}
+};

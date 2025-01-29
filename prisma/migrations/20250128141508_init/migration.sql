@@ -1,8 +1,8 @@
 -- CreateEnum
-CREATE TYPE "Status" AS ENUM ('todo', 'in_progress', 'done');
+CREATE TYPE "Status" AS ENUM ('TODO', 'IN_PROGRESS', 'DONE');
 
 -- CreateEnum
-CREATE TYPE "Priority" AS ENUM ('low', 'medium', 'high');
+CREATE TYPE "Priority" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -21,8 +21,8 @@ CREATE TABLE "Task" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
-    "status" "Status" NOT NULL DEFAULT 'todo',
-    "priority" "Priority" NOT NULL DEFAULT 'medium',
+    "status" "Status" NOT NULL DEFAULT 'TODO',
+    "priority" "Priority" NOT NULL DEFAULT 'MEDIUM',
     "dueDate" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -46,8 +46,11 @@ CREATE TABLE "Column" (
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Column_order_key" ON "Column"("order");
+
 -- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_columnId_fkey" FOREIGN KEY ("columnId") REFERENCES "Column"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Task" ADD CONSTRAINT "Task_columnId_fkey" FOREIGN KEY ("columnId") REFERENCES "Column"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Task" ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -1,83 +1,99 @@
 "use client";
-import { useState } from "react";
-import { Droppable, Draggable } from "@hello-pangea/dnd";
+import React, { useState } from "react";
+import { Droppable } from "@hello-pangea/dnd";
+import { ColumnType, Task, Priority } from "@/types";
 import { Card } from "./Card";
-import { CardModal } from "./CardModal";
-import { ColumnType, Task, Priority, Status } from "../types";
-import { createTask } from "../app/actions/taskActions";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
-export function Column({
-  column,
-  index,
-  refreshBoard,
-}: {
+interface ColumnProps {
   column: ColumnType;
-  index: number;
-  refreshBoard: () => Promise<void>;
-}) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  onCreateTask: (columnId: string, taskData: Partial<Task>) => Promise<void>;
+  onEditTask: (task: Task) => void;
+  onDeleteTask: (taskId: string, columnId: string) => Promise<void>;
+}
 
-  const handleCreateTask = async (
-    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
-  ) => {
-    try {
-      await createTask(taskData);
-      setIsModalOpen(false);
-      await refreshBoard();
-    } catch (error) {
-      console.error("Failed to create task:", error);
+export const Column: React.FC<ColumnProps> = ({
+  column,
+  onCreateTask,
+  onEditTask,
+  onDeleteTask,
+}) => {
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [isAddingTask, setIsAddingTask] = useState(false);
+
+  const handleAddTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newTaskTitle.trim()) {
+      onCreateTask(column.id, {
+        title: newTaskTitle.trim(),
+        description: "",
+        priority: Priority.MEDIUM,
+      });
+      setNewTaskTitle("");
+      setIsAddingTask(false);
     }
   };
 
   return (
-    <Draggable draggableId={column.id} index={index}>
-      {(provided) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          className="bg-gray-100 p-4 rounded-lg shadow-md w-64"
+    <div className="bg-gray-100 p-4 rounded-lg w-80 flex-shrink-0 shadow-md">
+      <h2 className="text-lg font-semibold mb-4 text-gray-700">
+        {column.title}
+      </h2>
+      {isAddingTask ? (
+        <form onSubmit={handleAddTask} className="mb-4">
+          <input
+            type="text"
+            value={newTaskTitle}
+            onChange={(e) => setNewTaskTitle(e.target.value)}
+            placeholder="Enter task title"
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autoFocus
+          />
+          <div className="flex justify-end mt-2 space-x-2">
+            <button
+              type="button"
+              onClick={() => setIsAddingTask(false)}
+              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Add
+            </button>
+          </div>
+        </form>
+      ) : (
+        <button
+          onClick={() => setIsAddingTask(true)}
+          className="w-full mb-4 p-2 text-gray-600 border border-dashed border-gray-300 rounded hover:border-gray-400 hover:text-gray-800 flex items-center justify-center"
         >
-          <h2 className="text-lg font-bold mb-4" {...provided.dragHandleProps}>
-            {column.title}
-          </h2>
-          <Droppable droppableId={column.id} type="TASK">
-            {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps}>
-                {column.tasks.map((task, index) => (
-                  <Card key={task.id} task={task} refreshBoard={refreshBoard} />
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          >
-            New Task
-          </button>
-          {isModalOpen && (
-            <CardModal
-              mode="create"
-              task={{
-                id: "",
-                title: "",
-                description: "",
-                priority: "medium" as Priority,
-                status: "todo" as Status, // Add the status property
-                dueDate: null,
-                userId: null,
-                columnId: column.id,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              }}
-              onClose={() => setIsModalOpen(false)}
-              refreshBoard={refreshBoard}
-              onSubmit={handleCreateTask}
-            />
-          )}
-        </div>
+          <PlusIcon className="h-5 w-5 mr-2" />
+          Add Task
+        </button>
       )}
-    </Draggable>
+      <Droppable droppableId={column.id}>
+        {(provided) => (
+          <div
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            className="min-h-[100px] space-y-2"
+          >
+            {column.tasks.map((task, index) => (
+              <Card
+                key={task.id}
+                task={task}
+                index={index}
+                onEdit={() => onEditTask(task)}
+                onDelete={() => task.id && onDeleteTask(task.id, column.id)}
+              />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </div>
   );
-}
+};

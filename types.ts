@@ -1,11 +1,8 @@
-// types.ts
-
 export interface Task {
-  id: string;
+  id?: string;
   title: string;
   description: string | null;
   priority: Priority;
-  status: Status;
   dueDate: string | null;
   userId: string | null;
   columnId: string;
@@ -18,8 +15,6 @@ export interface Column {
   title: string;
   order: number;
   tasks: Task[];
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface ColumnType {
@@ -28,29 +23,38 @@ export interface ColumnType {
   tasks: Task[];
 }
 
-export interface ColumnProps {
-  column: Column;
+export enum Priority {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+}
+
+export interface CardProps {
+  task: Task;
+  refreshBoard: () => Promise<void>;
+  index: number;
+}
+
+export interface CardModalProps {
+  task: Task;
+  onClose: () => void;
+  onDelete: () => void;
+  refreshBoard: () => Promise<void>;
+  mode: "create" | "edit";
+  onSubmit: (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => Promise<void>;
+}
+
+export interface BoardClientProps {
+  initialColumns: ColumnType[];
 }
 
 export interface Tab {
   name: string;
   id: string;
 }
-
-export interface BoardClientProps {
-  initialColumns: ColumnType[];
-}
-export type Priority = "low" | "medium" | "high";
-export type Status = "todo" | "in_progress" | "done";
-export interface CardProps {
-  task: Task;
-  refreshBoard: () => Promise<void>;
-}
-
-export interface CardModalProps {
-  task: Task;
-
-  onClose: () => void;
-
-  refreshBoard: () => Promise<void>;
+export interface ColumnProps {
+  column: ColumnType;
+  onCreateTask: (columnId: string, taskData: Partial<Task>) => Promise<void>;
 }
