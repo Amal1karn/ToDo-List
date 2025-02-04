@@ -1,115 +1,139 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { CardModalProps, Priority } from "../types";
 
-export function CardModal({
+import React, { useState } from "react";
+import { CardModalProps, Priority } from "@/types";
+import { updateTask } from "@/app/actions/taskActions";
+
+export const CardModal: React.FC<CardModalProps> = ({
   task,
   onClose,
-  onSave,
+  onSubmit,
   onDelete,
   mode,
-}: CardModalProps) {
-  const [editedTask, setEditedTask] = useState(task);
-  const modalRef = useRef<HTMLDivElement>(null);
+  refreshBoard,
+}) => {
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description || "");
+  const [priority, setPriority] = useState<Priority>(
+    task.priority || Priority.LOW
+  );
+  const [dueDate, setDueDate] = useState(
+    task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
+  );
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        onClose();
-      }
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const taskId = task.id || "";
+    const columnId = task.columnId;
 
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [onClose]);
-
-  const handleSave = async () => {
-    await onSave(editedTask);
+    if (columnId === null || columnId === undefined) {
+      console.error("Column ID is null or undefined.");
+      return;
+    }
+    const updatedTask = await updateTask(taskId, {
+      title,
+      description,
+      priority,
+      dueDate: dueDate ? new Date(dueDate) : null,
+      userId: null,
+      columnId: columnId || "",
+    });
+    onSubmit({
+      ...updatedTask,
+      dueDate: updatedTask.dueDate ? new Date(updatedTask.dueDate) : undefined,
+    });
     onClose();
+    await refreshBoard();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-xs flex items-center justify-center z-50 rounded-sm">
-      <div ref={modalRef} className="bg-white p-12 rounded-lg w-1/3  shadow-xl">
-        <h2 className="text-2xl font-bold mb-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+        <h2 className="text-2xl font-semibold mb-4">
           {mode === "create" ? "Create Task" : "Edit Task"}
         </h2>
-        <input
-          type="text"
-          value={editedTask.title}
-          onChange={(e) =>
-            setEditedTask({ ...editedTask, title: e.target.value })
-          }
-          className="w-full p-2 mb-4 border rounded"
-          placeholder="Task Title"
-        />
-        <textarea
-          value={editedTask.description || ""}
-          onChange={(e) =>
-            setEditedTask({ ...editedTask, description: e.target.value })
-          }
-          className="w-full p-2 mb-4 border rounded"
-          placeholder="Task Description"
-        />
-        <select
-          value={editedTask.priority}
-          onChange={(e) =>
-            setEditedTask({
-              ...editedTask,
-              priority: e.target.value as Priority,
-            })
-          }
-          className="w-full p-2 mb-4 border rounded"
-        >
-          {Object.values(Priority).map((priority) => (
-            <option key={priority} value={priority}>
-              {priority}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          value={editedTask.dueDate || ""}
-          onChange={(e) =>
-            setEditedTask({ ...editedTask, dueDate: e.target.value })
-          }
-          className="w-full p-2 mb-4 border rounded"
-        />
-        <div className="flex justify-end space-x-2">
-          {mode === "edit" && onDelete && (
-            <button
-              onClick={onDelete}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Title
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Task Title"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Task Description"
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Priority
+            </label>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as Priority)}
+              className="w-full p-2 border border-gray-300 rounded"
             >
-              Delete
+              {Object.values(Priority).map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Due Date
+            </label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="flex justify-end space-x-2">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              {mode === "create" ? "Create" : "Update"}
             </button>
-          )}
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          >
-            Save
-          </button>
-        </div>
+            {mode === "edit" && (
+              <button
+                type="button"
+                onClick={() => {
+                  onDelete();
+                  onClose();
+                }}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+
       </div>
     </div>
   );
-}
+};

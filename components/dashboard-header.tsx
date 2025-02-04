@@ -1,44 +1,103 @@
 "use client";
+import { useState } from "react";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
+import { Card } from "./Card";
+import { CardModal } from "./CardModal";
+import { ColumnType, Task, Priority } from "../types";
+import { createTask } from "../app/actions/taskActions";
 
-import { Bell, User } from "lucide-react";
+export function Column({
+  column,
+  index,
+  refreshBoard,
+}: {
+  column: ColumnType;
+  index: number;
+  refreshBoard: () => Promise<void>;
+}) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  const handleCreateTask = async (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => {
+    try {
+      await createTask({
+        ...taskData,
+        priority: taskData.priority || Priority.LOW,
+        dueDate: taskData.dueDate ? taskData.dueDate.toISOString() : undefined,
+      });
+      await refreshBoard();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Failed to create task:", error);
+    }
+  };
 
-export function DashboardHeader() {
   return (
-    <header className=" bg-stone-200 border-b">
-      <div className="flex h-16 items-center px-4 gap-4">
-        <h1 className="text-xl font-semibold">Dashboard</h1>
-        <div className="ml-auto flex items-center space-x-4">
-          <Button variant="ghost" size="icon">
-            <Bell className="h-6 w-6" />
-            <span className="sr-only">Notifications</span>
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-                <span className="sr-only">User menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Sign out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <Draggable draggableId={column.id} index={index}>
+      {(provided) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          className="bg-gray-100 p-4 rounded-lg shadow-md w-64"
+        >
+          <h2 className="text-lg font-bold mb-4" {...provided.dragHandleProps}>
+            {column.title}
+          </h2>
+          <Droppable droppableId={column.id} type="TASK">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {column.tasks.map((task, index) => (
+                  <Card
+                    key={task.id}
+                    task={task}
+                    index={index}
+                    onEdit={function (): void {
+                      throw new Error("Function not implemented.");
+                    }}
+                    onDelete={function (): void {
+                      throw new Error("Function not implemented.");
+                    }}
+                    onClick={function (): void {
+                      throw new Error("Function not implemented.");
+                    }}
+                  />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            New Task
+          </button>
+          {isModalOpen && (
+            <CardModal
+              mode="create"
+              task={{
+                id: "",
+                title: "",
+                description: "",
+                priority: Priority.LOW,
+                status: "TODO",
+                dueDate: undefined,
+                userId: null,
+                columnId: column.id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              }}
+              onClose={() => setIsModalOpen(false)}
+              refreshBoard={refreshBoard}
+              onSubmit={handleCreateTask}
+              onDelete={function (): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
+          )}
         </div>
-      </div>
-    </header>
+      )}
+    </Draggable>
   );
 }

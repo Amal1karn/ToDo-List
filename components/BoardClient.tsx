@@ -1,42 +1,193 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
+import { DragDropContext, DropResult } from "@hello-pangea/dnd";
+import { ColumnType, Task, Priority } from "@/types";
 import { Board } from "./BoardComponent";
-import { BoardClientProps, Tab, ColumnType } from "../types";
+import { CardModal } from "./CardModal";
+import {
+  createTask,
+  updateTask,
+  moveTask,
+  deleteTask,
+} from "@/app/actions/taskActions";
 
-const tabs: Tab[] = [
-  { name: "Boards", id: "boards" },
-  { name: "Reports", id: "reports" },
-];
-
-export function BoardClient({
+export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
   initialColumns,
-}: {
-  initialColumns: ColumnType[];
-}) {
-  const [activeTab, setActiveTab] = useState<Tab["id"]>("boards");
+}) => {
+  const [columns, setColumns] = useState(initialColumns);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  
+  const onDragEnd = async (result: DropResult) => {
+    const { source, destination, draggableId } = result;
+    if (!destination) return;
+
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    const startColumn = columns.find((col) => col.id === source.droppableId);
+    const finishColumn = columns.find(
+      (col) => col.id === destination.droppableId
+    );
+
+    if (!startColumn || !finishColumn) return;
+
+    if (startColumn === finishColumn) {
+      const newTasks = Array.from(startColumn.tasks);
+      const [reorderedTask] = newTasks.splice(source.index, 1);
+      newTasks.splice(destination.index, 0, reorderedTask);
+
+      const newColumn = {
+        ...startColumn,
+        tasks: newTasks,
+      };
+
+      setColumns((prevColumns) =>
+        prevColumns.map((col) => (col.id === newColumn.id ? newColumn : col))
+      );
+    } else {
+      const startTasks = Array.from(startColumn.tasks);
+      const [movedTask] = startTasks.splice(source.index, 1);
+      const newStartColumn = {
+        ...startColumn,
+        tasks: startTasks,
+      };
+
+      const finishTasks = Array.from(finishColumn.tasks);
+      finishTasks.splice(destination.index, 0, movedTask);
+      const newFinishColumn = {
+        ...finishColumn,
+        tasks: finishTasks,
+      };
+
+      setColumns((prevColumns) =>
+        prevColumns.map((col) =>
+          col.id === newStartColumn.id
+            ? newStartColumn
+            : col.id === newFinishColumn.id
+            ? newFinishColumn
+            : col
+        )
+      );
+
+      try {
+        // Use non-null assertion for draggableId
+        await moveTask(draggableId!, destination.droppableId);
+      } catch (error) {
+        console.error("Failed to move task:", error);
+      }
+    }
+  };
+
+  const handleCreateTask = async (
+    columnId: string,
+    taskData: Partial<Task>
+  ) => {
+    if (!taskData.title || taskData.title.trim() === "") {
+      console.error("Title is required to create a task.");
+      return;
+    }
+
+    try {
+      const newTask = await createTask({
+        title: taskData.title.trim(),
+        description: taskData.description || "",
+        priority: taskData.priority || Priority.MEDIUM,
+        columnId,
+        dueDate: taskData.dueDate ? taskData.dueDate.toString() : undefined,
+        // Add any other required fields here
+      });
+
+      setColumns((prevColumns) =>
+        prevColumns.map((column) =>
+          column.id === columnId
+            ? { ...column, tasks: [newTask, ...column.tasks] }
+            : column
+        )
+      );
+    } catch (error) {
+      console.error("Failed to create task:", error);
+    }
+  };
+
+  const handleEditTask = (task: Task) => {
+    setActiveTask(task);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdateTask = async (taskData: Partial<Task>) => {
+    if (!activeTask) return;
+    try {
+      const updatedTask = await updateTask(activeTask.id!, {
+        ...activeTask,
+        ...taskData,
+        description: taskData.description ?? activeTask.description, // Ensure description is included
+      });
+      setColumns((prevColumns) =>
+        prevColumns.map((column) => ({
+          ...column,
+          tasks: column.tasks.map((task) =>
+            task.id === activeTask.id ? updatedTask : task
+          ),
+        }))
+      );
+      setIsModalOpen(false);
+      setActiveTask(null);
+      await refreshBoard();
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string, columnId: string) => {
+    try {
+      await deleteTask(taskId);
+      setColumns((prevColumns) =>
+        prevColumns.map((column) =>
+          column.id === columnId
+            ? {
+                ...column,
+                tasks: column.tasks.filter((task) => task.id !== taskId),
+              }
+            : column
+        )
+      );
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    }
+  };
+
+  const refreshBoard = async () => {
+    // Implement your refresh logic here
+    // For example, you might want to fetch the latest data from the server
+    console.log("Refreshing board...");
+  };
 
   return (
-    <div className=" flex flex-col h-screenp-4">
-      <div className="flex border-b mb-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 ${
-              activeTab === tab.id
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-500"
-            }`}
-          >
-            {tab.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex items-center justify-center h-full">
-        {activeTab === "boards" && <Board columns={initialColumns} />}
-        {activeTab === "reports" && <div>Reports Content</div>}
-      </div>
-    </div>
+    <>
+      <Board
+        columns={columns}
+        onDragEnd={onDragEnd}
+        onCreateTask={handleCreateTask}
+        onEditTask={handleEditTask}
+        onDeleteTask={handleDeleteTask}
+      />
+      {isModalOpen && activeTask && (
+        <CardModal
+          task={activeTask}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleUpdateTask}
+          mode="edit"
+          refreshBoard={refreshBoard}
+          onDelete={function (): void {
+            throw new Error("Function not implemented.");
+          }}
+        />
+      )}
+    </>
   );
-}
+};

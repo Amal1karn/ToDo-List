@@ -1,104 +1,60 @@
 "use client";
-import { useState } from "react";
-import { Droppable, Draggable } from "@hello-pangea/dnd";
+import React from "react";
+import { Droppable } from "@hello-pangea/dnd";
+import { ColumnType, Task } from "@/types";
 import { Card } from "./Card";
-import { CardModal } from "./CardModal";
-import { ColumnProps, Task, Status, Priority } from "../types";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
-export function Column({
+interface ColumnProps {
+  column: ColumnType;
+  onCreateTask: (columnId: string, taskData: Partial<Task>) => Promise<void>;
+  onEditTask: (task: Task) => void;
+  onDeleteTask: (taskId: string, columnId: string) => Promise<void>;
+  onCardClick: (task: Task) => void;
+  onAddTaskClick: (columnId: string) => void; // Add this line
+}
+
+export const Column: React.FC<ColumnProps> = ({
   column,
-  onDeleteTask,
-  onUpdateTask,
   onCreateTask,
-}: ColumnProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleCreateTask = async (newTask: Task) => {
-    try {
-      await onCreateTask({
-        title: newTask.title,
-        description: newTask.description,
-        status: column.id as Status,
-        priority: newTask.priority,
-        dueDate: newTask.dueDate,
-        userId: newTask.userId,
-      });
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Failed to create task:", error);
-    }
-  };
-
+  onEditTask,
+  onDeleteTask,
+  onCardClick,
+  onAddTaskClick, // Destructure onAddTaskClick
+}) => {
   return (
-    <div className="bg-stone-200 p-4 rounded-lg shadow-md flex flex-col w-80 h-full ">
-      <h2 className="text-lg font-bold mb-4">{column.title}</h2>
+    <div className="bg-gray-100 p-4 rounded-lg w-80 flex-shrink-0 shadow-md">
+      <h2 className="text-lg font-semibold mb-4 text-gray-700">
+        {column.title}
+      </h2>
+      <button
+        onClick={() => onAddTaskClick(column.id)} // Call onAddTaskClick with column ID
+        className="w-full mb-4 p-2 text-gray-600 border border-dashed border-gray-300 rounded hover:border-gray-400 hover:text-gray-800 flex items-center justify-center"
+      >
+        <PlusIcon className="h-5 w-5 mr-2" />
+        Add Task
+      </button>
       <Droppable droppableId={column.id}>
         {(provided) => (
           <div
-            ref={provided.innerRef}
             {...provided.droppableProps}
-            className="flex-1 overflow-y-auto min-h-[500px]"
+            ref={provided.innerRef}
+            className="min-h-[100px] space-y-2"
           >
             {column.tasks.map((task, index) => (
-              <Draggable key={task.id} draggableId={task.id} index={index}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className="mb-2"
-                  >
-                    <Card
-                      task={task}
-                      onDelete={() => onDeleteTask(task.id)}
-                      onUpdate={onUpdateTask}
-                    />
-                  </div>
-                )}
-              </Draggable>
+              <Card
+                key={task.id}
+                task={task}
+                index={index}
+                onEdit={() => onEditTask(task)}
+                onDelete={() => task.id && onDeleteTask(task.id, column.id)}
+                onClick={() => onCardClick(task)}
+              />
             ))}
             {provided.placeholder}
-            <button
-              className="mt-4 p-2 border-2 border-dashed border-white text-white rounded-md hover:bg-neutral-100/75 transition-colors flex items-center justify-center w-full"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </button>
           </div>
         )}
       </Droppable>
-
-      {isModalOpen && (
-        <CardModal
-          task={{
-            id: "",
-            title: "",
-            description: "",
-            status: column.id as Status,
-            priority: Priority.MEDIUM,
-            dueDate: null,
-            userId: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          }}
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleCreateTask}
-          mode="create"
-        />
-      )}
     </div>
   );
-}
+};

@@ -1,15 +1,24 @@
-import { Status, Priority } from "@prisma/client";
+
+import { Priority, Status } from "@prisma/client";
 
 export interface Task {
-  id: string;
+  id?: string;
   title: string;
   description: string | null;
+  priority?: Priority;
   status: Status;
-  priority: Priority;
-  dueDate: string | null;
-  userId: string | null;
+  dueDate?: Date | null;
+  userId?: string | null;
+  columnId: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Column {
+  id: string;
+  title: string;
+  order: number;
+  tasks: Task[];
 }
 
 export interface ColumnType {
@@ -18,38 +27,35 @@ export interface ColumnType {
   tasks: Task[];
 }
 
-export interface BoardProps {
-  columns: ColumnType[];
-}
-
-export interface ColumnProps {
-  column: ColumnType;
-  onDeleteTask: (taskId: string) => Promise<void>;
-  onUpdateTask: (task: Task) => Promise<void>;
-  onCreateTask: (
-    task: Omit<Task, "id" | "createdAt" | "updatedAt">
-  ) => Promise<void>;
-  refreshBoard: () => Promise<void>;
-}
-
 export interface CardProps {
   task: Task;
-  onDelete: () => Promise<void>;
-  onUpdate: (task: Task) => Promise<void>;
+  refreshBoard: () => Promise<void>;
+  index: number;
 }
 
 export interface CardModalProps {
   task: Task;
   onClose: () => void;
-  onSave: (task: Task) => Promise<void>;
-  onDelete?: () => Promise<void>;
+  onDelete: () => void;
+  refreshBoard: () => Promise<void>;
   mode: "create" | "edit";
+  onSubmit: (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => Promise<void>;
 }
+
 export interface BoardClientProps {
   initialColumns: ColumnType[];
 }
+
 export interface Tab {
   name: string;
   id: string;
 }
-export { Status, Priority };
+
+export interface ColumnProps {
+  column: ColumnType;
+  onCreateTask: (columnId: string, taskData: Partial<Task>) => Promise<void>;
+}
+
+export { Priority, Status };
