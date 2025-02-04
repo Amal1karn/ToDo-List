@@ -31,7 +31,7 @@ Drag and Drop: @hello-pangea/dnd (fork of @react-beautiful-dnd)
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/kanban-board.git
+git clone https://github.com/Amal1karn/ToDo-List.git
 ```
 
 Navigate to the project directory:
