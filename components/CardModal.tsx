@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { CardModalProps, Priority } from "@/types";
 import { updateTask } from "@/app/actions/taskActions";
@@ -131,6 +132,7 @@ export const CardModal: React.FC<CardModalProps> = ({
             </button>
           </div>
         </form>
+
       </div>
     </div>
   );

@@ -23,7 +23,7 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Projects", href: "/", icon: FolderKanban },
   { name: "Team", href: "/", icon: Users },
-  { name: "Reports", href: "/", icon: BarChart3 },
+  { name: "Reports", href: "/todo_report", icon: BarChart3 },
 ];
 
 export function DashboardSidebar() {
