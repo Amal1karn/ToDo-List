@@ -1,4 +1,5 @@
 // page.tsx (Server Component)
+
 import { BoardClient } from "../components/BoardClient";
 import { getColumnsWithTasks } from "../app/actions/taskActions";
 import ErrorBoundary from "../components/ErrorBoundary";

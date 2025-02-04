@@ -21,7 +21,11 @@ export function Column({
     taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
   ) => {
     try {
-      await createTask(taskData);
+      await createTask({
+        ...taskData,
+        priority: taskData.priority || Priority.LOW,
+        dueDate: taskData.dueDate ? taskData.dueDate.toISOString() : undefined,
+      });
       await refreshBoard();
       setIsModalOpen(false);
     } catch (error) {
@@ -54,6 +58,9 @@ export function Column({
                     onDelete={function (): void {
                       throw new Error("Function not implemented.");
                     }}
+                    onClick={function (): void {
+                      throw new Error("Function not implemented.");
+                    }}
                   />
                 ))}
                 {provided.placeholder}
@@ -73,8 +80,9 @@ export function Column({
                 id: "",
                 title: "",
                 description: "",
-                priority: Priority.MEDIUM,
-                dueDate: null,
+                priority: Priority.LOW,
+                status: "TODO",
+                dueDate: undefined,
                 userId: null,
                 columnId: column.id,
                 createdAt: new Date(),

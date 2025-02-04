@@ -4,16 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { ColumnType, Priority, Task, Column } from "@/types";
 
-function validateTaskData(data: any): boolean {
-  const requiredFields = ["title", "priority", "columnId"];
-  for (const field of requiredFields) {
-    if (data[field] === undefined || data[field] === null) {
-      console.error(`Missing required field: ${field}`);
-      return false;
-    }
-  }
-  return true;
-}
 export async function initializeColumns() {
   const columnCount = await prisma.column.count();
   if (columnCount === 0) {
@@ -45,14 +35,16 @@ export async function getColumnsWithTasks(): Promise<ColumnType[]> {
 
     console.log("Fetched Columns:", columns);
 
-    return columns.map((column: Column) => ({
-      id: column.id,
-      title: column.title,
-      tasks: column.tasks.map((task: Task) => ({
-        ...task,
-        dueDate: task.dueDate ? task.dueDate : null,
-      })),
-    }));
+    return columns.map((column) => {
+      return {
+        id: column.id,
+        title: column.title,
+        tasks: column.tasks.map((task) => ({
+          ...task,
+          dueDate: task.dueDate ? new Date(task.dueDate) : null,
+        })),
+      };
+    });
   } catch (error) {
     console.error("Failed to fetch columns with tasks:", error);
     throw new Error("Failed to fetch columns and tasks");
@@ -79,8 +71,8 @@ export async function createTask(data: {
         description: data.description || "",
         priority: data.priority,
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
-        userId: data.userId ? { connect: { id: data.userId } } : undefined,
-        column: { connect: { id: data.columnId } },
+        userId: data.userId || null,
+        columnId: data.columnId,
       },
     });
 

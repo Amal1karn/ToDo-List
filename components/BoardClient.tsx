@@ -98,6 +98,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
         description: taskData.description || "",
         priority: taskData.priority || Priority.MEDIUM,
         columnId,
+        dueDate: taskData.dueDate ? taskData.dueDate.toString() : undefined,
         // Add any other required fields here
       });
 

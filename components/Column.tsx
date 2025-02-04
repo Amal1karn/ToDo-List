@@ -88,6 +88,9 @@ export const Column: React.FC<ColumnProps> = ({
                 index={index}
                 onEdit={() => onEditTask(task)}
                 onDelete={() => task.id && onDeleteTask(task.id, column.id)}
+                onClick={function (): void {
+                  throw new Error("Function not implemented.");
+                }}
               />
             ))}
             {provided.placeholder}

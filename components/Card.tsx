@@ -1,4 +1,6 @@
 "use client";
+//client side and server side
+
 import React, { useState } from "react";
 import { Draggable } from "@hello-pangea/dnd";
 import { Task } from "@/types";
@@ -6,18 +8,20 @@ import {
   CalendarIcon,
   PencilIcon,
   TrashIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
 } from "@heroicons/react/24/outline";
+import DeleteButton from "./DeleteButton";
 
 interface CardProps {
+  //typescript type definition
   task: Task;
   index: number;
   onEdit: () => void;
   onDelete: () => void;
+  onClick: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({
+  //props react
   task,
   index,
   onEdit,
@@ -25,10 +29,10 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+  const formatDate = (date: string | Date | null) => {
+    if (!date) return null;
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    return dateObj.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -41,11 +45,11 @@ export const Card: React.FC<CardProps> = ({
   };
 
   return (
-    <Draggable draggableId={task.id || ""} index={index}>
+    <Draggable draggableId={task.id || " "} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
-          {...provided.draggableProps}
+          {...provided.draggableProps} //destructure   javascript
           {...provided.dragHandleProps}
           className="bg-white p-4 mb-2 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
@@ -79,20 +83,7 @@ export const Card: React.FC<CardProps> = ({
               </div>
             )}
           </div>
-          <div className="mt-3 flex justify-between items-center">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              {isExpanded ? (
-                <ChevronUpIcon className="h-5 w-5" />
-              ) : (
-                <ChevronDownIcon className="h-5 w-5" />
-              )}
-            </button>
+          <div className="mt-3 flex justify-end items-center">
             <div className="flex space-x-2">
               <button
                 onClick={(e) => {
@@ -103,15 +94,8 @@ export const Card: React.FC<CardProps> = ({
               >
                 <PencilIcon className="h-4 w-4" />
               </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors duration-200"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </button>
+
+              <DeleteButton onDelete={onDelete} />
             </div>
           </div>
         </div>
