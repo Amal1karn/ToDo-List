@@ -17,7 +17,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
   const [columns, setColumns] = useState(initialColumns);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-
+  
   const onDragEnd = async (result: DropResult) => {
     const { source, destination, draggableId } = result;
     if (!destination) return;

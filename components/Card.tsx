@@ -1,4 +1,5 @@
 "use client";
+
 //client side and server side
 
 import React, { useState } from "react";
