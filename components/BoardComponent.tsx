@@ -30,6 +30,8 @@ export const Board: React.FC<BoardProps> = ({
             onCreateTask={onCreateTask}
             onEditTask={onEditTask}
             onDeleteTask={onDeleteTask}
+            onCardClick={() => {}}
+            onAddTaskClick={() => {}}
           />
         ))}
       </div>
