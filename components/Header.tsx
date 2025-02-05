@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard" },
+  { name: "Dashboard", href: "/" },
   { name: "Projects", href: "/projects" },
   { name: "Team", href: "/team" },
   { name: "Reports", href: "/reports" },
@@ -59,14 +59,22 @@ export function DashboardHeader() {
             </div>
           </div>
           <div className="ml-10 space-x-4">
-            <Button variant="ghost" size="icon">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:bg-neutral-200 rounded-full"
+            >
               <Bell className="h-6 w-6" />
               <span className="sr-only">Notifications</span>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-neutral-200 rounded-full"
+                >
+                  <User className="h-6 w-6" />
                   <span className="sr-only">User menu</span>
                 </Button>
               </DropdownMenuTrigger>

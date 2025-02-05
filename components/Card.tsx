@@ -53,7 +53,7 @@ export const Card: React.FC<CardProps> = ({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className="bg-white p-4 mb-2 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+          className="bg-white p-4 mb-2  shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer rounded-md !important"
           onClick={onClick} // Handle card click to open edit mode
         >
           <h3 className="font-bold text-lg mb-2 text-gray-800">{task.title}</h3>
@@ -92,9 +92,9 @@ export const Card: React.FC<CardProps> = ({
                   e.stopPropagation();
                   onEdit();
                 }}
-                className="p-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors duration-200"
+                className="p-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors duration-200  hover:scale-110 "
               >
-                <PencilIcon className="h-4 w-4" />
+                <PencilIcon className="h-5 w-5 m-2" />
               </button>
 
               <DeleteButton onDelete={onDelete} />
