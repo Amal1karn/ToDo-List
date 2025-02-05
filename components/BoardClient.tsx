@@ -19,12 +19,14 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
+  // Function to handle card click and open the modal in edit mode
   const handleCardClick = (task: Task) => {
     setActiveTask(task);
     setModalMode("edit");
     setIsModalOpen(true);
   };
 
+  // Function to handle adding a new task and open the modal in create mode
   const handleAddTaskClick = (columnId: string) => {
     setActiveTask({
       title: "",
@@ -36,6 +38,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     setIsModalOpen(true);
   };
 
+  // Function to handle drag and drop events
   const onDragEnd = async (result: DropResult) => {
     const { source, destination, draggableId } = result;
     if (!destination) return;
@@ -100,6 +103,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     }
   };
 
+  // Function to handle creating a new task
   const handleCreateTask = async (
     columnId: string,
     taskData: Partial<Task>
@@ -132,12 +136,14 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     }
   };
 
+  // Function to handle editing a task
   const handleEditTask = (task: Task) => {
     setActiveTask(task);
     setModalMode("edit");
     setIsModalOpen(true);
   };
 
+  // Function to handle updating a task
   const handleUpdateTask = async (taskData: Partial<Task>) => {
     if (!activeTask) return;
     try {
@@ -163,6 +169,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     }
   };
 
+  // Function to handle deleting a task
   const handleDeleteTask = async (taskId: string, columnId: string) => {
     try {
       await deleteTask(taskId);
@@ -181,10 +188,12 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     }
   };
 
+  // Function to refresh the board (placeholder)
   const refreshBoard = async () => {
     console.log("Refreshing board...");
   };
 
+  // Function to handle form submission in the modal
   const handleSubmit = async (taskData: Partial<Task>) => {
     if (modalMode === "create" && activeTask) {
       await handleCreateTask(activeTask.columnId, taskData);
@@ -201,7 +210,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
           onCreateTask={handleCreateTask}
           onEditTask={handleEditTask}
           onDeleteTask={handleDeleteTask}
-          onCardClick={handleCardClick}
+          onCardClick={handleCardClick} // Pass handleCardClick to Board
           onAddTaskClick={handleAddTaskClick}
           onDragEnd={onDragEnd} // Ensure onDragEnd is passed correctly
         />

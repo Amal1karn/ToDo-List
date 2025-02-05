@@ -11,7 +11,7 @@ interface BoardProps {
   onCreateTask: (columnId: string, taskData: Partial<Task>) => Promise<void>;
   onEditTask: (task: Task) => void;
   onDeleteTask: (taskId: string, columnId: string) => Promise<void>;
-  onCardClick: (task: Task) => void;
+  onCardClick: (task: Task) => void; // Add onCardClick prop
   onAddTaskClick: (columnId: string) => void;
 }
 
@@ -21,7 +21,7 @@ export const Board: React.FC<BoardProps> = ({
   onCreateTask,
   onEditTask,
   onDeleteTask,
-  onCardClick,
+  onCardClick, // Add onCardClick prop
   onAddTaskClick,
 }) => {
   return (
@@ -34,7 +34,7 @@ export const Board: React.FC<BoardProps> = ({
             onCreateTask={onCreateTask}
             onEditTask={onEditTask}
             onDeleteTask={onDeleteTask}
-            onCardClick={onCardClick}
+            onCardClick={onCardClick} // Pass onCardClick to Column
             onAddTaskClick={onAddTaskClick}
           />
         ))}

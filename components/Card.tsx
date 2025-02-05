@@ -18,7 +18,7 @@ interface CardProps {
   index: number;
   onEdit: () => void;
   onDelete: () => void;
-  onClick: () => void;
+  onClick: () => void; // Add onClick prop
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -27,6 +27,7 @@ export const Card: React.FC<CardProps> = ({
   index,
   onEdit,
   onDelete,
+  onClick, // Add onClick prop
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -53,7 +54,7 @@ export const Card: React.FC<CardProps> = ({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           className="bg-white p-4 mb-2 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={onClick} // Handle card click to open edit mode
         >
           <h3 className="font-bold text-lg mb-2 text-gray-800">{task.title}</h3>
           {task.description && (

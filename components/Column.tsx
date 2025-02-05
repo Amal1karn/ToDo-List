@@ -10,7 +10,7 @@ interface ColumnProps {
   onCreateTask: (columnId: string, taskData: Partial<Task>) => Promise<void>;
   onEditTask: (task: Task) => void;
   onDeleteTask: (taskId: string, columnId: string) => Promise<void>;
-  onCardClick: (task: Task) => void;
+  onCardClick: (task: Task) => void; // Add onCardClick prop
   onAddTaskClick: (columnId: string) => void;
 }
 
@@ -19,7 +19,7 @@ export const Column: React.FC<ColumnProps> = ({
   onCreateTask,
   onEditTask,
   onDeleteTask,
-  onCardClick,
+  onCardClick, // Add onCardClick prop
   onAddTaskClick,
 }) => {
   return (
@@ -35,11 +35,13 @@ export const Column: React.FC<ColumnProps> = ({
         Add Task
       </button>
       <Droppable droppableId={column.id}>
-        {(provided) => (
+        {(provided, snapshot) => (
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className="min-h-[100px] space-y-2"
+            className={`min-h-[100px] space-y-2 ${
+              snapshot.isDraggingOver ? "bg-blue-100" : ""
+            }`}
           >
             {column.tasks.map((task, index) => (
               <Card
@@ -48,7 +50,7 @@ export const Column: React.FC<ColumnProps> = ({
                 index={index}
                 onEdit={() => onEditTask(task)}
                 onDelete={() => task.id && onDeleteTask(task.id, column.id)}
-                onClick={() => onCardClick(task)}
+                onClick={() => onCardClick(task)} // Pass onCardClick to Card
               />
             ))}
             {provided.placeholder}
