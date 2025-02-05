@@ -11,7 +11,7 @@ interface ColumnProps {
   onEditTask: (task: Task) => void;
   onDeleteTask: (taskId: string, columnId: string) => Promise<void>;
   onCardClick: (task: Task) => void;
-  onAddTaskClick: (columnId: string) => void; // Add this line
+  onAddTaskClick: (columnId: string) => void;
 }
 
 export const Column: React.FC<ColumnProps> = ({
@@ -20,7 +20,7 @@ export const Column: React.FC<ColumnProps> = ({
   onEditTask,
   onDeleteTask,
   onCardClick,
-  onAddTaskClick, // Destructure onAddTaskClick
+  onAddTaskClick,
 }) => {
   return (
     <div className="bg-gray-100 p-4 rounded-lg w-80 flex-shrink-0 shadow-md">
@@ -28,7 +28,7 @@ export const Column: React.FC<ColumnProps> = ({
         {column.title}
       </h2>
       <button
-        onClick={() => onAddTaskClick(column.id)} // Call onAddTaskClick with column ID
+        onClick={() => onAddTaskClick(column.id)}
         className="w-full mb-4 p-2 text-gray-600 border border-dashed border-gray-300 rounded hover:border-gray-400 hover:text-gray-800 flex items-center justify-center"
       >
         <PlusIcon className="h-5 w-5 mr-2" />

@@ -3,7 +3,17 @@
 import React from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { Column } from "./Column";
-import { BoardProps } from "@/types";
+import { ColumnType, Task } from "@/types";
+
+interface BoardProps {
+  columns: ColumnType[];
+  onDragEnd: (result: DropResult) => void;
+  onCreateTask: (columnId: string, taskData: Partial<Task>) => Promise<void>;
+  onEditTask: (task: Task) => void;
+  onDeleteTask: (taskId: string, columnId: string) => Promise<void>;
+  onCardClick: (task: Task) => void;
+  onAddTaskClick: (columnId: string) => void;
+}
 
 export const Board: React.FC<BoardProps> = ({
   columns,
@@ -11,6 +21,8 @@ export const Board: React.FC<BoardProps> = ({
   onCreateTask,
   onEditTask,
   onDeleteTask,
+  onCardClick,
+  onAddTaskClick,
 }) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -22,11 +34,13 @@ export const Board: React.FC<BoardProps> = ({
             onCreateTask={onCreateTask}
             onEditTask={onEditTask}
             onDeleteTask={onDeleteTask}
-            onCardClick={() => {}}
-            onAddTaskClick={() => {}}
+            onCardClick={onCardClick}
+            onAddTaskClick={onAddTaskClick}
           />
         ))}
       </div>
     </DragDropContext>
   );
 };
+
+export default Board;

@@ -50,43 +50,15 @@ export const CardModal: React.FC<CardModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (mode === "create") {
-      const newTask = await createTask({
-        title,
-        description,
-        priority,
-        dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-        userId: null,
-        columnId: task.columnId,
-      });
-      onSubmit(newTask);
-    } else {
-      const taskId = task.id || "";
-      const columnId = task.columnId;
-
-      if (!taskId || !columnId) {
-        console.error("Task ID or Column ID is missing.");
-        return;
-      }
-
-      const updatedTask = await updateTask(taskId, {
-        title,
-        description,
-        priority,
-        dueDate: dueDate ? new Date(dueDate) : null,
-        userId: null,
-        columnId,
-      });
-
-      onSubmit({
-        ...updatedTask,
-        dueDate: updatedTask.dueDate
-          ? new Date(updatedTask.dueDate)
-          : undefined,
-      });
-    }
+    await onSubmit({
+      title,
+      description,
+      priority,
+      dueDate: dueDate ? new Date(dueDate) : null,
+      status: task.status,
+      columnId: task.columnId,
+    });
     onClose();
-    await refreshBoard();
   };
 
   return (

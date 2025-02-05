@@ -50,7 +50,7 @@ export const Card: React.FC<CardProps> = ({
       {(provided) => (
         <div
           ref={provided.innerRef}
-          {...provided.draggableProps} //destructure   javascript
+          {...provided.draggableProps}
           {...provided.dragHandleProps}
           className="bg-white p-4 mb-2 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}

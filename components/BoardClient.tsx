@@ -144,6 +144,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
       const updatedTask = await updateTask(activeTask.id!, {
         ...activeTask,
         ...taskData,
+        dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
         description: taskData.description ?? activeTask.description, // Ensure description is included
       });
       setColumns((prevColumns) =>
@@ -184,6 +185,14 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     console.log("Refreshing board...");
   };
 
+  const handleSubmit = async (taskData: Partial<Task>) => {
+    if (modalMode === "create" && activeTask) {
+      await handleCreateTask(activeTask.columnId, taskData);
+    } else if (modalMode === "edit" && activeTask) {
+      await handleUpdateTask(taskData);
+    }
+  };
+
   return (
     <>
       <DragDropContext onDragEnd={onDragEnd}>
@@ -194,20 +203,14 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
           onDeleteTask={handleDeleteTask}
           onCardClick={handleCardClick}
           onAddTaskClick={handleAddTaskClick}
-          onDragEnd={onDragEnd}
+          onDragEnd={onDragEnd} // Ensure onDragEnd is passed correctly
         />
       </DragDropContext>
       {isModalOpen && activeTask && (
         <CardModal
           task={activeTask}
           onClose={() => setIsModalOpen(false)}
-          onSubmit={async (taskData) => {
-            if (modalMode === "create") {
-              await handleCreateTask(activeTask!.columnId, taskData);
-            } else {
-              await handleUpdateTask(taskData);
-            }
-          }}
+          onSubmit={handleSubmit} // Ensure handleSubmit is passed correctly
           mode={modalMode}
           onDelete={() => handleDeleteTask(activeTask.id!, activeTask.columnId)}
           refreshBoard={refreshBoard}
