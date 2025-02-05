@@ -17,7 +17,25 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
   const [columns, setColumns] = useState(initialColumns);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-  
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+
+  const handleCardClick = (task: Task) => {
+    setActiveTask(task);
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  const handleAddTaskClick = (columnId: string) => {
+    setActiveTask({
+      title: "",
+      description: "",
+      priority: Priority.LOW,
+      columnId,
+    } as Task);
+    setModalMode("create");
+    setIsModalOpen(true);
+  };
+
   const onDragEnd = async (result: DropResult) => {
     const { source, destination, draggableId } = result;
     if (!destination) return;
@@ -75,7 +93,6 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
       );
 
       try {
-        // Use non-null assertion for draggableId
         await moveTask(draggableId!, destination.droppableId);
       } catch (error) {
         console.error("Failed to move task:", error);
@@ -98,8 +115,9 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
         description: taskData.description || "",
         priority: taskData.priority || Priority.MEDIUM,
         columnId,
-        dueDate: taskData.dueDate ? taskData.dueDate.toString() : undefined,
-        // Add any other required fields here
+        dueDate: taskData.dueDate
+          ? new Date(taskData.dueDate).toISOString()
+          : undefined,
       });
 
       setColumns((prevColumns) =>
@@ -116,6 +134,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
 
   const handleEditTask = (task: Task) => {
     setActiveTask(task);
+    setModalMode("edit");
     setIsModalOpen(true);
   };
 
@@ -162,32 +181,39 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
   };
 
   const refreshBoard = async () => {
-    // Implement your refresh logic here
-    // For example, you might want to fetch the latest data from the server
     console.log("Refreshing board...");
   };
 
   return (
     <>
-      <Board
-        columns={columns}
-        onDragEnd={onDragEnd}
-        onCreateTask={handleCreateTask}
-        onEditTask={handleEditTask}
-        onDeleteTask={handleDeleteTask}
-      />
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Board
+          columns={columns}
+          onCreateTask={handleCreateTask}
+          onEditTask={handleEditTask}
+          onDeleteTask={handleDeleteTask}
+          onCardClick={handleCardClick}
+          onAddTaskClick={handleAddTaskClick}
+        />
+      </DragDropContext>
       {isModalOpen && activeTask && (
         <CardModal
           task={activeTask}
           onClose={() => setIsModalOpen(false)}
-          onSubmit={handleUpdateTask}
-          mode="edit"
-          refreshBoard={refreshBoard}
-          onDelete={function (): void {
-            throw new Error("Function not implemented.");
+          onSubmit={async (taskData) => {
+            if (modalMode === "create") {
+              await handleCreateTask(activeTask!.columnId, taskData);
+            } else {
+              await handleUpdateTask(taskData);
+            }
           }}
+          mode={modalMode}
+          onDelete={() => handleDeleteTask(activeTask.id!, activeTask.columnId)}
+          refreshBoard={refreshBoard}
         />
       )}
     </>
   );
 };
+
+export default BoardClient;

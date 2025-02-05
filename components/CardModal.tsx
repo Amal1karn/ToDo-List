@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CardModalProps, Priority } from "@/types";
-import { updateTask } from "@/app/actions/taskActions";
+import { updateTask, createTask } from "@/app/actions/taskActions";
 
 export const CardModal: React.FC<CardModalProps> = ({
   task,
@@ -12,7 +12,7 @@ export const CardModal: React.FC<CardModalProps> = ({
   mode,
   refreshBoard,
 }) => {
-  const [title, setTitle] = useState(task.title);
+  const [title, setTitle] = useState(task.title || "");
   const [description, setDescription] = useState(task.description || "");
   const [priority, setPriority] = useState<Priority>(
     task.priority || Priority.LOW
@@ -21,34 +21,80 @@ export const CardModal: React.FC<CardModalProps> = ({
     task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
   );
 
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTitle(task.title || "");
+    setDescription(task.description || "");
+    setPriority(task.priority || Priority.LOW);
+    setDueDate(
+      task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
+    );
+  }, [task, mode]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const taskId = task.id || "";
-    const columnId = task.columnId;
+    if (mode === "create") {
+      const newTask = await createTask({
+        title,
+        description,
+        priority,
+        dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+        userId: null,
+        columnId: task.columnId,
+      });
+      onSubmit(newTask);
+    } else {
+      const taskId = task.id || "";
+      const columnId = task.columnId;
 
-    if (columnId === null || columnId === undefined) {
-      console.error("Column ID is null or undefined.");
-      return;
+      if (!taskId || !columnId) {
+        console.error("Task ID or Column ID is missing.");
+        return;
+      }
+
+      const updatedTask = await updateTask(taskId, {
+        title,
+        description,
+        priority,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        userId: null,
+        columnId,
+      });
+
+      onSubmit({
+        ...updatedTask,
+        dueDate: updatedTask.dueDate
+          ? new Date(updatedTask.dueDate)
+          : undefined,
+      });
     }
-    const updatedTask = await updateTask(taskId, {
-      title,
-      description,
-      priority,
-      dueDate: dueDate ? new Date(dueDate) : null,
-      userId: null,
-      columnId: columnId || "",
-    });
-    onSubmit({
-      ...updatedTask,
-      dueDate: updatedTask.dueDate ? new Date(updatedTask.dueDate) : undefined,
-    });
     onClose();
     await refreshBoard();
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+      <div
+        ref={modalRef}
+        className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full"
+      >
         <h2 className="text-2xl font-semibold mb-4">
           {mode === "create" ? "Create Task" : "Edit Task"}
         </h2>
@@ -132,7 +178,6 @@ export const CardModal: React.FC<CardModalProps> = ({
             </button>
           </div>
         </form>
-
       </div>
     </div>
   );
