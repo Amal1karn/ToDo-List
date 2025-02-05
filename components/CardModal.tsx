@@ -65,7 +65,7 @@ export const CardModal: React.FC<CardModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
         ref={modalRef}
-        className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full"
+        className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full "
       >
         <h2 className="text-2xl font-semibold mb-4">
           {mode === "create" ? "Create Task" : "Edit Task"}

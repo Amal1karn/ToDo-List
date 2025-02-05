@@ -28,7 +28,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onDelete }) => {
         onClick={handleDeleteClick}
         className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors hover:scale-110 duration-500"
       >
-        <TrashIcon className="h-5 w-5" />
+        <TrashIcon className="h-5 w-5 m-2" />
       </button>
       {showConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

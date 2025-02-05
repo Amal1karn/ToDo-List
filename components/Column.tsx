@@ -23,7 +23,7 @@ export const Column: React.FC<ColumnProps> = ({
   onAddTaskClick,
 }) => {
   return (
-    <div className="bg-gray-100 p-4 rounded-lg w-80 flex-shrink-0 shadow-md">
+    <div className="bg-gray-100 p-4 rounded-lg w-80 flex-shrink-0 shadow-md h-[calc(100vh-200px)] ml-32">
       <h2 className="text-lg font-semibold mb-4 text-gray-700">
         {column.title}
       </h2>
