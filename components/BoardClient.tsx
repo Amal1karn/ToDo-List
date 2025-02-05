@@ -194,6 +194,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
           onDeleteTask={handleDeleteTask}
           onCardClick={handleCardClick}
           onAddTaskClick={handleAddTaskClick}
+          onDragEnd={onDragEnd}
         />
       </DragDropContext>
       {isModalOpen && activeTask && (
