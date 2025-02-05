@@ -17,7 +17,28 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
   const [columns, setColumns] = useState(initialColumns);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-  
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+
+  // Function to handle card click and open the modal in edit mode
+  const handleCardClick = (task: Task) => {
+    setActiveTask(task);
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  // Function to handle adding a new task and open the modal in create mode
+  const handleAddTaskClick = (columnId: string) => {
+    setActiveTask({
+      title: "",
+      description: "",
+      priority: Priority.LOW,
+      columnId,
+    } as Task);
+    setModalMode("create");
+    setIsModalOpen(true);
+  };
+
+  // Function to handle drag and drop events
   const onDragEnd = async (result: DropResult) => {
     const { source, destination, draggableId } = result;
     if (!destination) return;
@@ -75,7 +96,6 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
       );
 
       try {
-        // Use non-null assertion for draggableId
         await moveTask(draggableId!, destination.droppableId);
       } catch (error) {
         console.error("Failed to move task:", error);
@@ -83,6 +103,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     }
   };
 
+  // Function to handle creating a new task
   const handleCreateTask = async (
     columnId: string,
     taskData: Partial<Task>
@@ -98,8 +119,9 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
         description: taskData.description || "",
         priority: taskData.priority || Priority.MEDIUM,
         columnId,
-        dueDate: taskData.dueDate ? taskData.dueDate.toString() : undefined,
-        // Add any other required fields here
+        dueDate: taskData.dueDate
+          ? new Date(taskData.dueDate).toISOString()
+          : undefined,
       });
 
       setColumns((prevColumns) =>
@@ -114,17 +136,21 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     }
   };
 
+  // Function to handle editing a task
   const handleEditTask = (task: Task) => {
     setActiveTask(task);
+    setModalMode("edit");
     setIsModalOpen(true);
   };
 
+  // Function to handle updating a task
   const handleUpdateTask = async (taskData: Partial<Task>) => {
     if (!activeTask) return;
     try {
       const updatedTask = await updateTask(activeTask.id!, {
         ...activeTask,
         ...taskData,
+        dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
         description: taskData.description ?? activeTask.description, // Ensure description is included
       });
       setColumns((prevColumns) =>
@@ -143,6 +169,7 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     }
   };
 
+  // Function to handle deleting a task
   const handleDeleteTask = async (taskId: string, columnId: string) => {
     try {
       await deleteTask(taskId);
@@ -161,33 +188,45 @@ export const BoardClient: React.FC<{ initialColumns: ColumnType[] }> = ({
     }
   };
 
+  // Function to refresh the board (placeholder)
   const refreshBoard = async () => {
-    // Implement your refresh logic here
-    // For example, you might want to fetch the latest data from the server
     console.log("Refreshing board...");
+  };
+
+  // Function to handle form submission in the modal
+  const handleSubmit = async (taskData: Partial<Task>) => {
+    if (modalMode === "create" && activeTask) {
+      await handleCreateTask(activeTask.columnId, taskData);
+    } else if (modalMode === "edit" && activeTask) {
+      await handleUpdateTask(taskData);
+    }
   };
 
   return (
     <>
-      <Board
-        columns={columns}
-        onDragEnd={onDragEnd}
-        onCreateTask={handleCreateTask}
-        onEditTask={handleEditTask}
-        onDeleteTask={handleDeleteTask}
-      />
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Board
+          columns={columns}
+          onCreateTask={handleCreateTask}
+          onEditTask={handleEditTask}
+          onDeleteTask={handleDeleteTask}
+          onCardClick={handleCardClick} // Pass handleCardClick to Board
+          onAddTaskClick={handleAddTaskClick}
+          onDragEnd={onDragEnd} // Ensure onDragEnd is passed correctly
+        />
+      </DragDropContext>
       {isModalOpen && activeTask && (
         <CardModal
           task={activeTask}
           onClose={() => setIsModalOpen(false)}
-          onSubmit={handleUpdateTask}
-          mode="edit"
+          onSubmit={handleSubmit} // Ensure handleSubmit is passed correctly
+          mode={modalMode}
+          onDelete={() => handleDeleteTask(activeTask.id!, activeTask.columnId)}
           refreshBoard={refreshBoard}
-          onDelete={function (): void {
-            throw new Error("Function not implemented.");
-          }}
         />
       )}
     </>
   );
 };
+
+export default BoardClient;

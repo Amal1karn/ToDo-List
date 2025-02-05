@@ -1,4 +1,4 @@
-
+import { DropResult } from "@hello-pangea/dnd";
 import { Priority, Status } from "@prisma/client";
 
 export interface Task {
@@ -58,4 +58,13 @@ export interface ColumnProps {
   onCreateTask: (columnId: string, taskData: Partial<Task>) => Promise<void>;
 }
 
+export interface BoardProps {
+  columns: ColumnType[];
+  onCreateTask: (columnId: string, taskData: Partial<Task>) => Promise<void>;
+  onEditTask: (task: Task) => void;
+  onDeleteTask: (taskId: string, columnId: string) => Promise<void>;
+  onAddTaskClick: (columnId: string) => void;
+  onCardClick: (task: Task) => void;
+  onDragEnd: (result: DropResult) => void;
+}
 export { Priority, Status };
