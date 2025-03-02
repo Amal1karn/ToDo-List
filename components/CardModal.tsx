@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { CardModalProps, Priority } from "@/types";
-import { updateTask, createTask } from "@/app/actions/taskActions";
 
 export const CardModal: React.FC<CardModalProps> = ({
   task,
@@ -58,14 +57,16 @@ export const CardModal: React.FC<CardModalProps> = ({
       status: task.status,
       columnId: task.columnId,
     });
+    refreshBoard();
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50 ">
       <div
         ref={modalRef}
-        className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full "
+        className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full backdrop-filter 
+       "
       >
         <h2 className="text-2xl font-semibold mb-4">
           {mode === "create" ? "Create Task" : "Edit Task"}
@@ -125,7 +126,7 @@ export const CardModal: React.FC<CardModalProps> = ({
           <div className="flex justify-end space-x-2">
             <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-sky-400 text-white font-bold px-4 py-2 rounded hover:bg-sky-500"
             >
               {mode === "create" ? "Create" : "Update"}
             </button>
@@ -134,6 +135,7 @@ export const CardModal: React.FC<CardModalProps> = ({
                 type="button"
                 onClick={() => {
                   onDelete();
+                  refreshBoard();
                   onClose();
                 }}
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"

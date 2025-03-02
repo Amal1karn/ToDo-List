@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { ColumnType, Priority, Task, Column } from "@/types";
+import { ColumnType, Priority, Task } from "@/types";
 
 export async function initializeColumns() {
   const columnCount = await prisma.column.count();
@@ -51,7 +51,6 @@ export async function getColumnsWithTasks(): Promise<ColumnType[]> {
   }
 }
 
-// The rest of the file remains unchanged
 // Create a new task
 export async function createTask(data: {
   title: string;

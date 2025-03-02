@@ -16,7 +16,6 @@ interface ColumnProps {
 
 export const Column: React.FC<ColumnProps> = ({
   column,
-  onCreateTask,
   onEditTask,
   onDeleteTask,
   onCardClick, // Add onCardClick prop

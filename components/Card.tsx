@@ -5,11 +5,7 @@
 import React, { useState } from "react";
 import { Draggable } from "@hello-pangea/dnd";
 import { Task } from "@/types";
-import {
-  CalendarIcon,
-  PencilIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { CalendarIcon, PencilIcon } from "@heroicons/react/24/outline";
 import DeleteButton from "./DeleteButton";
 
 interface CardProps {
@@ -46,6 +42,11 @@ export const Card: React.FC<CardProps> = ({
     return text.substr(0, maxLength) + "...";
   };
 
+  const handleCardClick = () => {
+    setIsExpanded(!isExpanded);
+    onClick();
+  };
+
   return (
     <Draggable draggableId={task.id || " "} index={index}>
       {(provided) => (
@@ -54,7 +55,7 @@ export const Card: React.FC<CardProps> = ({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           className="bg-white p-4 mb-2  shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer rounded-md !important"
-          onClick={onClick} // Handle card click to open edit mode
+          onClick={handleCardClick} // Handle card click to open edit mode
         >
           <h3 className="font-bold text-lg mb-2 text-gray-800">{task.title}</h3>
           {task.description && (
