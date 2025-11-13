@@ -10,45 +10,45 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        background: "#0d0d1a", // purple
+        foreground: "#e0e0f8", // light neon text
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "#1f1f35", // dark card base
+          foreground: "#e0e0f8",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "#12142b", // slightly lighter dark popover
+          foreground: "#e0e0f8",
         },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#7f5af0", // neon purple
+          foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#0ff1ce", // neon cyan
+          foreground: "#0d0d1a",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "#5656ff", // electric blue
+          foreground: "#ffffff",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#ff6f91", // neon pink
+          foreground: "#0d0d1a",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "#ff4d6d", // hot red
+          foreground: "#ffffff",
         },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        border: "#7f5af0", // glowing purple outlines
+        input: "#1a1a2e", // dark input background
+        ring: "#0ff1ce", // cyan glow
         chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
+          "1": "#7f5af0",
+          "2": "#0ff1ce",
+          "3": "#ff6f91",
+          "4": "#5656ff",
+          "5": "#ffffff",
         },
       },
       borderRadius: {
