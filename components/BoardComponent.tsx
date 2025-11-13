@@ -26,7 +26,7 @@ export const Board: React.FC<BoardProps> = ({
 }) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex space-x-4 p-4 overflow-x-auto">
+      <div className="flex space-x-4 p-4 overflow-x-auto bg-secondary/10 min-h-[calc(100vh-160px)]">
         {columns.map((column) => (
           <Column
             key={column.id}
